@@ -242,6 +242,14 @@ The application renders all 604 pages of the Mushaf Madina:
 
 ---
 
+---
+
+## ⚠️ Known Issues
+
+- **Dynamic Resizing**: The application currently encounters layout issues when dynamically resizing on certain screen resolutions. The text scaling and grid alignment need improvement to ensure a consistent experience across all devices. **Fixing this is currently a top editorial priority.**
+
+---
+
 ## 🤝 Contributing
 
 **We need your help to make this better!**
