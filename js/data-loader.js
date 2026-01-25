@@ -4,7 +4,7 @@
  */
 
 class QuranDataLoader {
-    constructor(dataPath = '../data') {
+    constructor(dataPath = 'data') {
         this.dataPath = dataPath;
         this.suwar = null;
         this.pageMapping = null;

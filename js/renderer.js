@@ -109,9 +109,9 @@ class PageRenderer {
         // Determine font file URL
         let fontUrl;
         if (fontNumber === 0) {
-            fontUrl = '../assets/fonts/qcf4/QCF4_QBSML.woff2';
+            fontUrl = 'assets/fonts/qcf4/QCF4_QBSML.woff2';
         } else {
-            fontUrl = `../assets/fonts/qcf4/QCF4_Hafs_${fontNumber.toString().padStart(2, '0')}_W.woff2`;
+            fontUrl = `assets/fonts/qcf4/QCF4_Hafs_${fontNumber.toString().padStart(2, '0')}_W.woff2`;
         }
 
         // Create and inject @font-face style
