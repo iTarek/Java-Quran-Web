@@ -1,0 +1,722 @@
+/* ===================================
+   QuranApp - Clean Modern Styles
+   =================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #2c5530;
+    --secondary-color: #d4af37;
+    --bg-color: #faf8f3;
+    --text-color: #1a1a1a;
+    --border-color: #e0d4b8;
+    --accent: #d4af37;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    direction: rtl;
+}
+
+/* ===================================
+   Loading Screen
+   =================================== */
+
+#loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg-color);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#loading p {
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+/* ===================================
+   Main App Layout
+   =================================== */
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ===================================
+   Page Container
+   =================================== */
+
+.page-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+}
+
+.page-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.quran-page {
+    /* Scale with both width and height to maintain aspect ratio */
+    width: min(100%, 60vh);
+    /* Width based on viewport height to maintain ratio */
+    max-width: 900px;
+    height: 100vh;
+    max-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-items: stretch;
+    padding: 0.5vh 1rem;
+    position: relative;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.page-content {
+    display: grid;
+    grid-template-rows: repeat(15, 1fr);
+    gap: 0;
+    align-content: stretch;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ===================================
+   Quran Text Rendering
+   =================================== */
+
+.quran-line {
+    display: block;
+    text-align: center;
+    direction: rtl;
+    unicode-bidi: bidi-override;
+    font-size: clamp(10px, 4vh, 32px);
+    width: 100%;
+    height: 100%;
+    /* Fill grid cell exactly */
+    max-height: 100%;
+    overflow: hidden;
+    line-height: 1.8;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.quran-line.empty-line {
+    visibility: hidden;
+}
+
+/* Center basmalah vertically in its row */
+.quran-line .qcf.basmalah {
+    font-size: clamp(20px, 3.5vh, 36px);
+    /* Same size as other text */
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.quran-line.centered {
+    text-align: center;
+    text-align-last: center;
+}
+
+/* QCF4 Font Glyphs */
+.qcf {
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+    vertical-align: baseline;
+}
+
+/* Specific glyph types */
+.qcf.word {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.qcf.word:hover {
+    color: var(--primary-color);
+}
+
+.qcf.ayah-marker {
+    color: var(--secondary-color);
+    margin: 0 0.2rem;
+}
+
+.qcf.waqf {
+    color: var(--primary-color);
+    font-size: 20px;
+}
+
+.qcf.surah-name {
+    color: #664628;
+    font-size: inherit;
+    /* Use same size as parent line */
+    background: linear-gradient(135deg, #e8d4b0, #f5e6d3);
+    border: 1px solid var(--secondary-color);
+    border-radius: 4px;
+    padding: 0 30%;
+    margin: 0 auto;
+    display: inline-block;
+    max-width: 85%;
+    max-height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    line-height: inherit;
+}
+
+.qcf.basmalah {
+    color: var(--primary-color);
+    font-size: inherit;
+    /* Use same size as parent line */
+    line-height: inherit;
+}
+
+/* ===================================
+   Ayah Grouping & Highlighting
+   =================================== */
+
+.ayah-group {
+    display: inline;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 0 -4px;
+}
+
+.ayah-group:hover {
+    background-color: rgba(212, 175, 55, 0.15);
+}
+
+.ayah-group:active {
+    background-color: rgba(212, 175, 55, 0.25);
+}
+
+/* QCF4 Font Classes (0-20) */
+.qcf-0 {
+    font-family: 'QCF4_QBSML', sans-serif;
+}
+
+.qcf-1 {
+    font-family: 'QCF4_Hafs_01', sans-serif;
+}
+
+.qcf-2 {
+    font-family: 'QCF4_Hafs_02', sans-serif;
+}
+
+.qcf-3 {
+    font-family: 'QCF4_Hafs_03', sans-serif;
+}
+
+.qcf-4 {
+    font-family: 'QCF4_Hafs_04', sans-serif;
+}
+
+.qcf-5 {
+    font-family: 'QCF4_Hafs_05', sans-serif;
+}
+
+.qcf-6 {
+    font-family: 'QCF4_Hafs_06', sans-serif;
+}
+
+.qcf-7 {
+    font-family: 'QCF4_Hafs_07', sans-serif;
+}
+
+.qcf-8 {
+    font-family: 'QCF4_Hafs_08', sans-serif;
+}
+
+.qcf-9 {
+    font-family: 'QCF4_Hafs_09', sans-serif;
+}
+
+.qcf-10 {
+    font-family: 'QCF4_Hafs_10', sans-serif;
+}
+
+.qcf-11 {
+    font-family: 'QCF4_Hafs_11', sans-serif;
+}
+
+.qcf-12 {
+    font-family: 'QCF4_Hafs_12', sans-serif;
+}
+
+.qcf-13 {
+    font-family: 'QCF4_Hafs_13', sans-serif;
+}
+
+.qcf-14 {
+    font-family: 'QCF4_Hafs_14', sans-serif;
+}
+
+.qcf-15 {
+    font-family: 'QCF4_Hafs_15', sans-serif;
+}
+
+.qcf-16 {
+    font-family: 'QCF4_Hafs_16', sans-serif;
+}
+
+.qcf-17 {
+    font-family: 'QCF4_Hafs_17', sans-serif;
+}
+
+.qcf-18 {
+    font-family: 'QCF4_Hafs_18', sans-serif;
+}
+
+.qcf-19 {
+    font-family: 'QCF4_Hafs_19', sans-serif;
+}
+
+.qcf-20 {
+    font-family: 'QCF4_Hafs_20', sans-serif;
+}
+
+/* ===================================
+   Navigation
+   =================================== */
+
+.page-nav {
+    background: white;
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.nav-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #3a6a3e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(44, 85, 48, 0.3);
+}
+
+.nav-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.page-info {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* ===================================
+   Error States
+   =================================== */
+
+.error {
+    color: #c82333;
+    text-align: center;
+    padding: 2rem;
+    font-size: 18px;
+}
+
+.error-screen {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-screen h2 {
+    color: #c82333;
+    margin-bottom: 1rem;
+}
+
+.error-screen button {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media (max-width: 768px) {
+    .app-header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .app-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .controls select,
+    .controls input {
+        font-size: 13px;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .page-container {
+        padding: 1rem;
+    }
+
+    .quran-page {
+        padding: 2rem 1rem;
+    }
+
+    .qcf {
+        font-size: 18px;
+    }
+
+    .page-nav {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav-btn {
+        width: 100%;
+        padding: 0.6rem 1.5rem;
+    }
+}
+
+/* ===================================
+   Scrollbar Styling
+   =================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ===================================
+   Page Header & Footer
+   =================================== */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+    font-family: qcf_p040, 'Traditional Arabic', serif;
+    font-size: clamp(18px, 3vh, 18px);
+    line-height: 0.8;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    direction: rtl;
+}
+
+.header-juz {
+    flex: 1;
+    text-align: right;
+    /* Juz on the right */
+    pointer-events: none;
+    font-weight: normal;
+}
+
+.header-surah {
+    flex: 1;
+    text-align: left;
+    /* Surah on the left */
+    pointer-events: none;
+    font-weight: normal;
+}
+
+.page-footer {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+    font-family: 'Kitab', sans-serif;
+    font-size: clamp(18px, 3vh, 18px);
+    line-height: 0.8;
+    cursor: pointer;
+}
+
+.page-footer[data-page-face="right"] {
+    justify-content: flex-start;
+    /* Right side in RTL */
+}
+
+.page-footer[data-page-face="left"] {
+    justify-content: flex-end;
+    /* Left side in RTL */
+}
+
+.page-number {
+    border: 1px solid rgba(70, 70, 70, 0.25);
+    border-top: none;
+    padding: 0.3rem 0.8rem 0.6rem;
+    pointer-events: none;
+}
+
+/* ===================================
+   Navigation Overlay
+   =================================== */
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#overlay.active {
+    display: flex;
+}
+
+.nav-modal {
+    background: #f5f5f5;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 360px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-header {
+    text-align: center;
+    padding: 1rem;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+.nav-header h3 {
+    font-family: 'qcf_p040', serif;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0.5rem;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+.nav-tab {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.nav-tab.active {
+    background: #d4af37;
+    /* Golden color */
+    color: #fff;
+    font-weight: bold;
+}
+
+.nav-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.nav-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    gap: 0.5rem;
+}
+
+.nav-list-item:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.nav-list-item .item-number {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.nav-list-item:hover .item-number {
+    background: #fff;
+    color: var(--accent);
+}
+
+.nav-list-item .item-name {
+    flex: 1;
+    text-align: right;
+    font-size: 1.1rem;
+    font-family: 'qcf_p040', serif;
+}
+
+.nav-list-item .item-page {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.nav-list-item:hover .item-page {
+    color: #fff;
+}
+
+/* ===================================
+   Navigation Arrows
+   =================================== */
+
+.nav-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e0d4b8;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #2c5530;
+    transition: all 0.2s ease;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-arrow:hover {
+    background: #d4af37;
+    color: #fff;
+    border-color: #d4af37;
+}
+
+.nav-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.nav-arrow-prev {
+    right: 10px;
+    /* RTL: prev is on the right */
+}
+
+.nav-arrow-next {
+    left: 10px;
+    /* RTL: next is on the left */
+}
+
+.nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.nav-arrow:disabled:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c5530;
+    border-color: #e0d4b8;
+}
+
+/* Hide arrows on very small screens */
+@media (max-width: 500px) {
+    .nav-arrow {
+        width: 30px;
+        height: 45px;
+        font-size: 18px;
+    }
+}

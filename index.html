@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المصحف الشريف</title>
+
+    <!-- QCF4 Fonts -->
+    <link rel="stylesheet" href="css/qcf4-fonts.css">
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>جاري تحميل المصحف الشريف...</p>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Navigation Arrows -->
+        <button class="nav-arrow nav-arrow-prev" id="prevPageBtn" aria-label="الصفحة السابقة">
+            <span>‹</span>
+        </button>
+        <button class="nav-arrow nav-arrow-next" id="nextPageBtn" aria-label="الصفحة التالية">
+            <span>›</span>
+        </button>
+
+        <!-- Page Container -->
+        <main class="page-container" id="pageContainer">
+            <!-- Rendered page will go here -->
+        </main>
+    </div>
+
+    <!-- Navigation Overlay -->
+    <div id="overlay">
+        <div class="nav-modal">
+            <div class="nav-header">
+                <h3 id="overlay-title">سُورَةُ الفَاتِحَة</h3>
+                <div class="page-info" id="overlay-page">ص ١</div>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="surahs">السور</button>
+                <button class="nav-tab" data-tab="juz">الأجزاء</button>
+            </div>
+            <div class="nav-content">
+                <div id="surahs-list" class="nav-list"></div>
+                <div id="juz-list" class="nav-list" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
