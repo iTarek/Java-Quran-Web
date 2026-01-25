@@ -76,7 +76,8 @@ Java-Quran-Web/
 │   └── renderer.js        # Page rendering engine
 ├── assets/
 │   └── fonts/
-│       └── qcf4/          # QCF4 font files (WOFF2)
+│       ├── qcf4/          # QCF4 font files (WOFF2)
+│       └── kitab/         # Kitab font files (WOFF2)
 └── data/
     ├── suwar.json         # Surah metadata
     ├── page_mapping.json  # Page-to-verse mappings
@@ -101,21 +102,7 @@ Java-Quran-Web/
    cd Java-Quran-Web
    ```
 
-2. **Set up data files**
-   
-   You'll need to provide the Quran data files in the `data/` directory:
-   - `suwar.json` - Contains information about all 114 Surahs
-   - `page_mapping.json` - Maps page numbers to verse ranges
-   - `mushaf_metadata.json` - Contains layout rules and centered lines
-   - `quran_layout.csv` - Detailed glyph-by-glyph layout data
-
-3. **Add QCF4 fonts**
-   
-   Place QCF4 font files in `assets/fonts/qcf4/`:
-   - `QCF4_QBSML.woff2` (for Basmalah)
-   - `QCF4_Hafs_01_W.woff2` through `QCF4_Hafs_20_W.woff2`
-
-4. **Start a local server**
+2. **Start a local server**
    ```bash
    # Using Python 3
    python -m http.server 8000
@@ -127,7 +114,7 @@ Java-Quran-Web/
    php -S localhost:8000
    ```
 
-5. **Open in browser**
+3. **Open in browser**
    
    Navigate to `http://localhost:8000` in your browser.
 
@@ -242,8 +229,6 @@ The application renders all 604 pages of the Mushaf Madina:
 
 ---
 
----
-
 ## ⚠️ Known Issues
 
 - **Dynamic Resizing**: The application currently encounters layout issues when dynamically resizing on certain screen resolutions. The text scaling and grid alignment need improvement to ensure a consistent experience across all devices. **Fixing this is currently a top editorial priority.**
@@ -314,17 +299,7 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 ## 🙏 Acknowledgments
 
 - **King Fahd Complex** - For the QCF4 font system
-- **Tanzil Project** - For Quran data standards
-- **Mushaf Madina** - For the authentic layout reference
 - **All Contributors** - For making this project better
-
----
-
-## 📞 Contact & Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/Java-Quran-Web/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/Java-Quran-Web/discussions)
-- **Email**: your.email@example.com
 
 ---
 
