@@ -6,6 +6,11 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
+
+## 🌐 Live Demo
+
+> **[Click here to view the Live Demo](https://itarek.github.io/Java-Quran-Web/)**
+
 ---
 
 ## 📸 Screenshots
