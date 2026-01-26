@@ -19,6 +19,9 @@ class QuranApp {
         this.isReady = false;
         // Persistent highlight state (for external API calls)
         this.persistentHighlight = null;
+        // Tafseer data
+        this.tafseerAr = null;  // Arabic tafseer (التفسير الميسر)
+        this.tafseerEn = null;  // English translation (Saheeh International)
     }
 
     /**
@@ -61,6 +64,12 @@ class QuranApp {
             // Render first page
             await this.renderPage(initialPage);
 
+            // Load tafseer data (don't block rendering)
+            this.loadTafseerData();
+
+            // Setup tafseer overlay
+            this.setupTafseerOverlay();
+
             // Mark as ready
             this.isReady = true;
 
@@ -76,6 +85,7 @@ class QuranApp {
             // Log API usage for developers
             console.log('📖 Public API: quranApp.goToAyah(surah, ayah) - Navigate to any ayah');
             console.log('📖 URL params: ?surah=2&ayah=6 or ?s=2&a=6');
+            console.log('📖 Click on any ayah to see tafseer');
         } catch (error) {
             console.error('❌ Failed to initialize app:', error);
             this.showError(error);
@@ -312,6 +322,7 @@ class QuranApp {
     /**
      * Setup ayah highlighting event listeners
      * When hovering over any part of an ayah, highlight ALL parts across all lines
+     * When clicking, show tafseer modal
      */
     setupAyahHighlighting() {
         document.querySelectorAll('.ayah-group').forEach(ayahGroup => {
@@ -324,6 +335,13 @@ class QuranApp {
             ayahGroup.addEventListener('mouseleave', () => {
                 this.removeAllHighlights();
                 // Persistent highlight stays (it uses a different class)
+            });
+
+            // Click to show tafseer
+            ayahGroup.addEventListener('click', () => {
+                const surah = parseInt(ayahGroup.getAttribute('data-surah'));
+                const ayah = parseInt(ayahGroup.getAttribute('data-ayah'));
+                this.showTafseer(surah, ayah);
             });
         });
     }
@@ -402,6 +420,12 @@ class QuranApp {
                 this.closeOverlay();
             }
         });
+
+        // Close button
+        const closeBtn = document.getElementById('overlayClose');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeOverlay());
+        }
 
         // Add click handlers to page headers/footers
         document.addEventListener('click', (e) => {
@@ -567,6 +591,122 @@ class QuranApp {
             'التَّاسِعَ وَالعِشْرُونَ', 'الثَّلَاثُونَ'
         ];
         return juzNames[juzNum - 1] || this.arabicNumerals(juzNum);
+    }
+
+    // ===================================
+    // TAFSEER FUNCTIONALITY
+    // ===================================
+
+    /**
+     * Load tafseer data files (Arabic and English)
+     */
+    async loadTafseerData() {
+        try {
+            const [arText, enText] = await Promise.all([
+                fetch('assets/tafseer/ar.muyassar.txt').then(r => r.text()),
+                fetch('assets/tafseer/en.sahih.txt').then(r => r.text())
+            ]);
+
+            this.tafseerAr = this.parseTafseerFile(arText);
+            this.tafseerEn = this.parseTafseerFile(enText);
+
+            console.log('✓ Tafseer data loaded');
+        } catch (error) {
+            console.error('Failed to load tafseer data:', error);
+        }
+    }
+
+    /**
+     * Parse tafseer file (format: surah|ayah|text)
+     * @returns {Map} Map with key "surah:ayah" and value as text
+     */
+    parseTafseerFile(text) {
+        const map = new Map();
+        const lines = text.trim().split('\n');
+
+        for (const line of lines) {
+            const parts = line.split('|');
+            if (parts.length >= 3) {
+                const surah = parseInt(parts[0]);
+                const ayah = parseInt(parts[1]);
+                const content = parts.slice(2).join('|'); // In case text contains |
+                map.set(`${surah}:${ayah}`, content);
+            }
+        }
+
+        return map;
+    }
+
+    /**
+     * Setup tafseer overlay event listeners
+     */
+    setupTafseerOverlay() {
+        const overlay = document.getElementById('tafseerOverlay');
+        const closeBtn = document.getElementById('tafseerClose');
+
+        // Close button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeTafseer());
+        }
+
+        // Close on background click
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    this.closeTafseer();
+                }
+            });
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                this.closeTafseer();
+            }
+        });
+    }
+
+    /**
+     * Show tafseer for a specific ayah
+     * @param {number} surah - Surah number
+     * @param {number} ayah - Ayah number
+     */
+    showTafseer(surah, ayah) {
+        const overlay = document.getElementById('tafseerOverlay');
+        const titleEl = document.getElementById('tafseer-title');
+        const arTextEl = document.getElementById('tafseer-ar-text');
+        const enTextEl = document.getElementById('tafseer-en-text');
+
+        if (!overlay || !this.tafseerAr || !this.tafseerEn) {
+            console.warn('Tafseer not ready yet');
+            return;
+        }
+
+        const key = `${surah}:${ayah}`;
+        const arContent = this.tafseerAr.get(key) || 'التفسير غير متوفر لهذه الآية';
+        const enContent = this.tafseerEn.get(key) || 'Translation not available for this verse';
+
+        // Get surah name for title
+        const surahData = this.dataLoader.getSurah(surah - 1);
+        const surahName = surahData ? surahData.name_ar : `سورة ${surah}`;
+
+        // Update content
+        titleEl.textContent = `${surahName} - الآية ${this.arabicNumerals(ayah)}`;
+        arTextEl.textContent = arContent;
+        enTextEl.textContent = enContent;
+
+        // Show overlay
+        overlay.classList.add('active');
+    }
+
+    /**
+     * Close tafseer overlay
+     */
+    closeTafseer() {
+        const overlay = document.getElementById('tafseerOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
     }
 }
 
