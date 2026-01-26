@@ -265,6 +265,12 @@ body {
     background-color: #ebe7df;
 }
 
+/* Persistent highlight for API/URL navigation - yellow with opacity */
+.ayah-group.persistent-highlight::before {
+    background-color: rgba(255, 235, 59, 0.5);
+    /* Yellow with 0.5 opacity */
+}
+
 .ayah-group.bookmarked::before {
     background-color: #dbd1c8 !important;
 }

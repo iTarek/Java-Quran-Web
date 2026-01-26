@@ -38,9 +38,11 @@
 - 📜 **Authentic Mushaf Layout** - Pixel-perfect replication of the printed Mushaf Madina (604 pages)
 - 🎨 **QCF4 Font System** - Professional-grade fonts from King Fahd Complex for Printing the Holy Quran
 - ⚡ **Zero Dependencies** - Pure vanilla JavaScript, HTML, and CSS
-- 📱 **Responsive Design** - Optimized for desktop and mobile devices
+- 📱 **Responsive Design** - Dynamic scaling using CSS Container Queries for all screen sizes
 - 🧭 **Easy Navigation** - Browse by Surah, Juz, or page number
 - 🎯 **Verse Highlighting** - Interactive verse-level highlighting on hover
+- 🟡 **External API** - Public JavaScript API to navigate and highlight any ayah programmatically
+- 🔗 **URL Navigation** - Direct linking to any page or specific ayah via URL parameters
 - 🔄 **RTL Support** - Full right-to-left layout for Arabic text
 - 🚀 **Fast Loading** - Dynamic font loading and efficient rendering
 
@@ -142,10 +144,78 @@ http://localhost:8000/#page/1    # Al-Fatiha (Page 1)
 http://localhost:8000/#page/293  # Al-Kahf (Page 293)
 ```
 
+### Direct Ayah Navigation (URL Parameters)
+
+Navigate directly to any specific ayah with automatic page detection and highlighting:
+```
+http://localhost:8000/?surah=2&ayah=255   # Ayat Al-Kursi
+http://localhost:8000/?s=36&a=1           # Surah Ya-Sin, Ayah 1
+```
+
+The ayah will be highlighted in **yellow** to distinguish it from hover highlights.
+
 ### Verse Interaction
 
-- **Hover** - Hover over any verse to see highlighting
+- **Hover** - Hover over any verse to see gray highlighting
+- **Persistent Highlight** - Yellow highlighting for API/URL navigation
 - **Click** - Click on a verse group to interact (feature can be extended)
+
+---
+
+## 🔌 Public API
+
+Java Quran Web exposes a public JavaScript API for integration with other applications:
+
+### Navigate to Any Ayah
+
+```javascript
+// Navigate to Surah Al-Baqarah (2), Ayah 255 (Ayat Al-Kursi)
+await quranApp.goToAyah(2, 255);
+
+// Navigate with options
+await quranApp.goToAyah(2, 255, {
+  persistent: true,  // Keep highlight until cleared (default: true)
+  scroll: true       // Scroll ayah into view (default: true)
+});
+```
+
+### Clear Persistent Highlight
+
+```javascript
+// Remove the yellow persistent highlight
+quranApp.clearPersistentHighlight();
+```
+
+### Additional Methods
+
+```javascript
+// Highlight ayah on current page (gray, temporary)
+quranApp.highlightAyah(surah, ayah);
+
+// Remove all hover highlights
+quranApp.removeAllHighlights();
+
+// Get current page number
+quranApp.currentPage;  // e.g., 42
+
+// Check if app is ready
+quranApp.isReady;  // true/false
+```
+
+### Embedding in Other Applications
+
+```html
+<iframe src="https://yourdomain.com/quran/?surah=2&ayah=255" width="100%" height="600"></iframe>
+```
+
+Or programmatically after loading:
+
+```javascript
+// Wait for app to initialize, then navigate
+window.addEventListener('load', async () => {
+  await quranApp.goToAyah(2, 255);
+});
+```
 
 ---
 
@@ -233,10 +303,6 @@ The application renders all 604 pages of the Mushaf Madina:
 - **Basmalah placement** - Special handling for "بسم الله الرحمن الرحيم"
 
 ---
-
-## ⚠️ Known Issues
-
-- **Dynamic Resizing**: The application currently encounters layout issues when dynamically resizing on certain screen resolutions. The text scaling and grid alignment need improvement to ensure a consistent experience across all devices. **Fixing this is currently a top editorial priority.**
 
 ---
 
@@ -326,7 +392,11 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 - [x] Basic Mushaf rendering
 - [x] Page navigation
 - [x] Surah and Juz navigation
-- [x] Responsive design
+- [x] Responsive design with CSS Container Queries
+- [x] Dynamic scaling for all screen sizes
+- [x] Public JavaScript API (goToAyah)
+- [x] URL parameter navigation (?surah=X&ayah=Y)
+- [x] Persistent ayah highlighting (yellow)
 
 ### Version 1.1 (Planned)
 - [ ] Search functionality

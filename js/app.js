@@ -1,5 +1,15 @@
 /**
  * QuranApp - Main Application Controller
+ * 
+ * PUBLIC API:
+ * - quranApp.goToAyah(surah, ayah, options) - Navigate to and highlight any ayah
+ * - quranApp.clearPersistentHighlight() - Clear persistent highlight
+ * - quranApp.highlightAyah(surah, ayah) - Highlight ayah on current page
+ * - quranApp.removeAllHighlights() - Remove all highlights
+ * 
+ * URL PARAMETERS:
+ * - ?surah=2&ayah=6 - Navigate directly to Surah 2, Ayah 6
+ * - ?s=2&a=6 - Short form of the above
  */
 class QuranApp {
     constructor() {
@@ -7,6 +17,8 @@ class QuranApp {
         this.renderer = null;
         this.currentPage = 1;
         this.isReady = false;
+        // Persistent highlight state (for external API calls)
+        this.persistentHighlight = null;
     }
 
     /**
@@ -33,8 +45,18 @@ class QuranApp {
             // Setup navigation arrows
             this.setupNavArrows();
 
-            // Check URL hash for initial page
-            const initialPage = this.getPageFromHash() || 1;
+            // Check URL parameters for ayah navigation first, then hash for page
+            const urlAyah = this.getAyahFromURL();
+            let initialPage = 1;
+
+            if (urlAyah) {
+                // Find the page containing this ayah
+                initialPage = this.findAyahPage(urlAyah.surah, urlAyah.ayah) || 1;
+                // Set persistent highlight to be applied after render
+                this.persistentHighlight = { surah: urlAyah.surah, ayah: urlAyah.ayah };
+            } else {
+                initialPage = this.getPageFromHash() || 1;
+            }
 
             // Render first page
             await this.renderPage(initialPage);
@@ -50,10 +72,138 @@ class QuranApp {
             // window.addEventListener('resize', () => this.scaleToFit());
 
             console.log('✅ App initialized successfully');
+
+            // Log API usage for developers
+            console.log('📖 Public API: quranApp.goToAyah(surah, ayah) - Navigate to any ayah');
+            console.log('📖 URL params: ?surah=2&ayah=6 or ?s=2&a=6');
         } catch (error) {
             console.error('❌ Failed to initialize app:', error);
             this.showError(error);
         }
+    }
+
+    /**
+     * PUBLIC API: Navigate to a specific ayah and highlight it
+     * @param {number|string} surah - Surah number (1-114)
+     * @param {number|string} ayah - Ayah number
+     * @param {Object} options - Options
+     * @param {boolean} options.persistent - If true, highlight stays until clearPersistentHighlight() is called
+     * @param {boolean} options.scroll - If true, scroll the ayah into view (default: true)
+     * @returns {Promise<boolean>} - Returns true if successful, false if ayah not found
+     * 
+     * @example
+     * // Navigate to Surah Al-Baqarah (2), Ayah 255 (Ayat Al-Kursi)
+     * await quranApp.goToAyah(2, 255);
+     * 
+     * // With persistent highlight (stays until manually cleared)
+     * await quranApp.goToAyah(2, 255, { persistent: true });
+     * 
+     * // Later, clear the persistent highlight
+     * quranApp.clearPersistentHighlight();
+     */
+    async goToAyah(surah, ayah, options = {}) {
+        const surahNum = parseInt(surah);
+        const ayahNum = parseInt(ayah);
+        const { persistent = true, scroll = true } = options;
+
+        // Validate inputs
+        if (isNaN(surahNum) || surahNum < 1 || surahNum > 114) {
+            console.error(`Invalid surah number: ${surah}. Must be 1-114.`);
+            return false;
+        }
+
+        // Wait for app to be ready
+        if (!this.isReady) {
+            console.log('Waiting for app to initialize...');
+            await new Promise(resolve => {
+                const check = setInterval(() => {
+                    if (this.isReady) {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+
+        // Find the page containing this ayah
+        const page = this.findAyahPage(surahNum, ayahNum);
+        if (!page) {
+            console.error(`Ayah ${surahNum}:${ayahNum} not found in the Mushaf.`);
+            return false;
+        }
+
+        // Set persistent highlight if requested
+        if (persistent) {
+            this.persistentHighlight = { surah: surahNum, ayah: ayahNum };
+        }
+
+        // Navigate to the page
+        if (this.currentPage !== page) {
+            await this.renderPage(page);
+        } else {
+            // If already on the page, apply the persistent highlight (yellow)
+            this.removePersistentHighlight();
+            this.applyPersistentHighlight(surahNum, ayahNum);
+        }
+
+        // Scroll the ayah into view
+        if (scroll) {
+            const ayahElement = document.querySelector(
+                `.ayah-group[data-surah="${surahNum}"][data-ayah="${ayahNum}"]`
+            );
+            if (ayahElement) {
+                ayahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        console.log(`📍 Navigated to Surah ${surahNum}, Ayah ${ayahNum} (Page ${page})`);
+        return true;
+    }
+
+    /**
+     * PUBLIC API: Clear persistent highlight
+     */
+    clearPersistentHighlight() {
+        this.persistentHighlight = null;
+        this.removePersistentHighlight();
+        console.log('🔄 Persistent highlight cleared');
+    }
+
+    /**
+     * Find which page contains a specific ayah
+     * @param {number} surah - Surah number (1-114)
+     * @param {number} ayah - Ayah number
+     * @returns {number|null} - Page number or null if not found
+     */
+    findAyahPage(surah, ayah) {
+        const layoutData = this.dataLoader.layoutData;
+        if (!layoutData) return null;
+
+        // Find the first glyph entry for this ayah
+        const entry = layoutData.find(row => row.sura === surah && row.verse === ayah);
+        return entry ? entry.pageNo : null;
+    }
+
+    /**
+     * Get ayah from URL parameters
+     * Supports: ?surah=2&ayah=6 or ?s=2&a=6
+     * @returns {Object|null} - {surah, ayah} or null
+     */
+    getAyahFromURL() {
+        const params = new URLSearchParams(window.location.search);
+
+        // Try full names first, then short forms
+        const surah = params.get('surah') || params.get('s');
+        const ayah = params.get('ayah') || params.get('a');
+
+        if (surah && ayah) {
+            const surahNum = parseInt(surah);
+            const ayahNum = parseInt(ayah);
+            if (!isNaN(surahNum) && !isNaN(ayahNum)) {
+                return { surah: surahNum, ayah: ayahNum };
+            }
+        }
+        return null;
     }
 
     /**
@@ -101,6 +251,11 @@ class QuranApp {
             // Setup ayah highlighting (highlight entire ayah across all lines)
             this.setupAyahHighlighting();
 
+            // Apply persistent highlight if set (yellow color)
+            if (this.persistentHighlight) {
+                this.applyPersistentHighlight(this.persistentHighlight.surah, this.persistentHighlight.ayah);
+            }
+
             // Log page info
             const pageInfo = this.renderer.getPageInfo(pageNumber);
             if (pageInfo) {
@@ -127,11 +282,30 @@ class QuranApp {
     }
 
     /**
-     * Remove all ayah highlights
+     * Remove all hover highlights (gray)
      */
     removeAllHighlights() {
         document.querySelectorAll('.ayah-group.highlighted-verse').forEach(el => {
             el.classList.remove('highlighted-verse');
+        });
+    }
+
+    /**
+     * Apply persistent highlight (yellow) - for API/URL navigation
+     */
+    applyPersistentHighlight(surah, ayah) {
+        const selector = `.ayah-group[data-surah="${surah}"][data-ayah="${ayah}"]`;
+        document.querySelectorAll(selector).forEach(el => {
+            el.classList.add('persistent-highlight');
+        });
+    }
+
+    /**
+     * Remove persistent highlight (yellow)
+     */
+    removePersistentHighlight() {
+        document.querySelectorAll('.ayah-group.persistent-highlight').forEach(el => {
+            el.classList.remove('persistent-highlight');
         });
     }
 
@@ -149,6 +323,7 @@ class QuranApp {
 
             ayahGroup.addEventListener('mouseleave', () => {
                 this.removeAllHighlights();
+                // Persistent highlight stays (it uses a different class)
             });
         });
     }
@@ -272,20 +447,22 @@ class QuranApp {
     }
 
     /**
-     * Go to previous page
+     * Go to previous page (clears persistent highlight)
      */
     prevPage() {
         if (this.currentPage > 1) {
+            this.persistentHighlight = null;  // Clear on manual navigation
             this.renderPage(this.currentPage - 1);
         }
     }
 
     /**
-     * Go to next page
+     * Go to next page (clears persistent highlight)
      */
     nextPage() {
         const totalPages = 604;
         if (this.currentPage < totalPages) {
+            this.persistentHighlight = null;  // Clear on manual navigation
             this.renderPage(this.currentPage + 1);
         }
     }
@@ -334,6 +511,7 @@ class QuranApp {
         list.querySelectorAll('.nav-list-item').forEach(item => {
             item.addEventListener('click', () => {
                 const page = parseInt(item.dataset.page);
+                this.persistentHighlight = null;  // Clear on manual navigation
                 this.renderPage(page);
                 this.closeOverlay();
             });
