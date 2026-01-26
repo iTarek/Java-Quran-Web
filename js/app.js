@@ -98,6 +98,9 @@ class QuranApp {
             // Update navigation arrow states
             this.updateNavArrows();
 
+            // Setup ayah highlighting (highlight entire ayah across all lines)
+            this.setupAyahHighlighting();
+
             // Log page info
             const pageInfo = this.renderer.getPageInfo(pageNumber);
             if (pageInfo) {
@@ -110,6 +113,44 @@ class QuranApp {
             document.getElementById('pageContainer').innerHTML =
                 `<p class="error">فشل تحميل الصفحة: ${error.message}</p>`;
         }
+    }
+
+    /**
+     * Highlight an ayah (all parts across all lines)
+     */
+    highlightAyah(surah, ayah) {
+        // Find all ayah-groups with matching surah/ayah
+        const selector = `.ayah-group[data-surah="${surah}"][data-ayah="${ayah}"]`;
+        document.querySelectorAll(selector).forEach(el => {
+            el.classList.add('highlighted-verse');
+        });
+    }
+
+    /**
+     * Remove all ayah highlights
+     */
+    removeAllHighlights() {
+        document.querySelectorAll('.ayah-group.highlighted-verse').forEach(el => {
+            el.classList.remove('highlighted-verse');
+        });
+    }
+
+    /**
+     * Setup ayah highlighting event listeners
+     * When hovering over any part of an ayah, highlight ALL parts across all lines
+     */
+    setupAyahHighlighting() {
+        document.querySelectorAll('.ayah-group').forEach(ayahGroup => {
+            ayahGroup.addEventListener('mouseenter', () => {
+                const surah = ayahGroup.getAttribute('data-surah');
+                const ayah = ayahGroup.getAttribute('data-ayah');
+                this.highlightAyah(surah, ayah);
+            });
+
+            ayahGroup.addEventListener('mouseleave', () => {
+                this.removeAllHighlights();
+            });
+        });
     }
 
     /**
