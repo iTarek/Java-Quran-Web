@@ -22,6 +22,9 @@ class QuranApp {
         // Tafseer data
         this.tafseerAr = null;  // Arabic tafseer (التفسير الميسر)
         this.tafseerEn = null;  // English translation (Saheeh International)
+        // Audio state
+        this.currentAudio = null;
+        this.currentPlayingAyah = null;
     }
 
     /**
@@ -438,6 +441,9 @@ class QuranApp {
     /**
      * Setup navigation arrows for prev/next page
      */
+    /**
+     * Setup navigation arrows for prev/next page
+     */
     setupNavArrows() {
         const prevBtn = document.getElementById('prevPageBtn');
         const nextBtn = document.getElementById('nextPageBtn');
@@ -449,6 +455,24 @@ class QuranApp {
         if (nextBtn) {
             nextBtn.addEventListener('click', () => this.nextPage());
         }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            // Ignore if overlay is active
+            if (document.getElementById('overlay').classList.contains('active') ||
+                document.getElementById('tafseerOverlay').classList.contains('active')) {
+                return;
+            }
+
+            if (e.key === 'ArrowRight') {
+                this.prevPage(); // Right goes to previous page in RTL
+            } else if (e.key === 'ArrowLeft') {
+                this.nextPage(); // Left goes to next page in RTL
+            } else if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault(); // Prevent scrolling
+                this.openOverlay();
+            }
+        });
 
         // Update arrow states based on current page
         this.updateNavArrows();
@@ -643,6 +667,17 @@ class QuranApp {
     setupTafseerOverlay() {
         const overlay = document.getElementById('tafseerOverlay');
         const closeBtn = document.getElementById('tafseerClose');
+        const playBtn = document.getElementById('tafseerPlay');
+
+        // Play button
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                const overlay = document.getElementById('tafseerOverlay');
+                if (overlay.dataset.surah && overlay.dataset.ayah) {
+                    this.toggleAyahAudio(overlay.dataset.surah, overlay.dataset.ayah);
+                }
+            });
+        }
 
         // Close button
         if (closeBtn) {
@@ -682,6 +717,17 @@ class QuranApp {
             return;
         }
 
+        // Store current surah/ayah on overlay for audio playback
+        overlay.dataset.surah = surah;
+        overlay.dataset.ayah = ayah;
+
+        // Reset play button
+        this.updatePlayIcon(false);
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+
         const key = `${surah}:${ayah}`;
         const arContent = this.tafseerAr.get(key) || 'التفسير غير متوفر لهذه الآية';
         const enContent = this.tafseerEn.get(key) || 'Translation not available for this verse';
@@ -706,6 +752,82 @@ class QuranApp {
         const overlay = document.getElementById('tafseerOverlay');
         if (overlay) {
             overlay.classList.remove('active');
+
+            // Stop audio when closing
+            if (this.currentAudio) {
+                this.currentAudio.pause();
+                this.currentAudio = null;
+                this.updatePlayIcon(false);
+            }
+        }
+    }
+
+    /**
+     * pad number with leading zeros (e.g. 1 -> "001")
+     */
+    padNumber(num) {
+        return String(num).padStart(3, '0');
+    }
+
+    /**
+     * Toggle audio playback for an ayah
+     */
+    toggleAyahAudio(surah, ayah) {
+        // If already playing, stop it
+        if (this.currentAudio && !this.currentAudio.paused) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+            this.updatePlayIcon(false);
+            return;
+        }
+
+        // Stop any existing audio
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+        }
+
+        // Construct URL: https://everyayah.com/data/Alafasy_128kbps/XXXxxx.mp3
+        const surahPad = this.padNumber(surah);
+        const ayahPad = this.padNumber(ayah);
+        const url = `https://everyayah.com/data/Alafasy_128kbps/${surahPad}${ayahPad}.mp3`;
+
+        console.log('▶ Playing audio:', url);
+
+        this.currentAudio = new Audio(url);
+
+        this.currentAudio.addEventListener('play', () => {
+            this.updatePlayIcon(true);
+        });
+
+        this.currentAudio.addEventListener('pause', () => {
+            this.updatePlayIcon(false);
+        });
+
+        this.currentAudio.addEventListener('ended', () => {
+            this.currentAudio = null;
+            this.updatePlayIcon(false);
+        });
+
+        this.currentAudio.addEventListener('error', (e) => {
+            console.error('Audio playback error:', e);
+            this.updatePlayIcon(false);
+            this.currentAudio = null;
+        });
+
+        this.currentAudio.play();
+    }
+
+    /**
+     * Update play button icon
+     */
+    updatePlayIcon(isPlaying) {
+        const btn = document.getElementById('tafseerPlay');
+        if (!btn) return;
+
+        if (isPlaying) {
+            btn.classList.add('playing');
+        } else {
+            btn.classList.remove('playing');
         }
     }
 }

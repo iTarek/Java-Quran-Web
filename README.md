@@ -39,8 +39,10 @@
 - 🎨 **QCF4 Font System** - Professional-grade fonts from King Fahd Complex for Printing the Holy Quran
 - ⚡ **Zero Dependencies** - Pure vanilla JavaScript, HTML, and CSS
 - 📱 **Responsive Design** - Dynamic scaling using CSS Container Queries for all screen sizes
-- 🧭 **Easy Navigation** - Browse by Surah, Juz, or page number
+- 🧭 **Easy Navigation** - Browse by Surah, Juz, page number, or keyboard shortcuts
 - 🎯 **Verse Highlighting** - Interactive verse-level highlighting on hover
+- 📖 **Tafseer & Translation** - Instant access to Arabic Tafseer (Al-Muyassar) and English Translation (Saheeh Intl)
+- 🎧 **Audio Playback** - Listen to verse recitation (Mishary Alafasy) directly from the Tafseer view
 - 🟡 **External API** - Public JavaScript API to navigate and highlight any ayah programmatically
 - 🔗 **URL Navigation** - Direct linking to any page or specific ayah via URL parameters
 - 🔄 **RTL Support** - Full right-to-left layout for Arabic text
@@ -157,8 +159,25 @@ The ayah will be highlighted in **yellow** to distinguish it from hover highligh
 ### Verse Interaction
 
 - **Hover** - Hover over any verse to see gray highlighting
+- **Click** - Click any verse to open the **Tafseer & Audio** modal
 - **Persistent Highlight** - Yellow highlighting for API/URL navigation
-- **Click** - Click on a verse group to interact (feature can be extended)
+
+### Keyboard Shortcuts
+
+- **Right Arrow** - Go to previous page
+- **Left Arrow** - Go to next page
+- **Space** - Open navigation menu (Surah/Juz list)
+- **Escape** - Close any open modal (Tafseer or Navigation)
+
+### Tafseer & Audio
+
+Clicking on any ayah opens a modal with:
+1. **Arabic Tafseer**: Al-Tafseer Al-Muyassar (التفسير الميسر)
+2. **English Translation**: Saheeh International
+3. **Audio Player**: Listen to the verse recitation by Mishary Rashid Alafasy
+   - Click `▶` to play (icon turns green w/ red stop square)
+   - Click `■` to stop
+   - Audio automatically stops when closing the modal
 
 ---
 
@@ -398,11 +417,13 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 - [x] URL parameter navigation (?surah=X&ayah=Y)
 - [x] Persistent ayah highlighting (yellow)
 
-### Version 1.1 (Planned)
+### Version 1.1 (Features)
+- [x] Tafseer (Interpretation) - Arabic & English
+- [x] Audio Recitation (Verse by Verse)
+- [x] Keyboard Navigation (Arrows & Space)
+- [x] Enhanced Navigation UI
 - [ ] Search functionality
 - [ ] Bookmarking system
-- [ ] Settings panel
-- [ ] Performance optimizations
 
 ### Version 2.0 (Future)
 - [ ] Audio recitation

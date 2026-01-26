@@ -668,6 +668,55 @@ mark {
     font-size: 1.25rem;
 }
 
+.tafseer-title-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tafseer-play {
+    background: #ffffff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0;
+}
+
+.tafseer-play .icon {
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 7px 0 7px 11px;
+    border-color: transparent transparent transparent #2e7d32;
+    /* Green play triangle */
+    margin-left: 3px;
+    /* Optical adjustment */
+    transition: all 0.2s;
+}
+
+.tafseer-play.playing .icon {
+    width: 12px;
+    height: 12px;
+    border: none;
+    background-color: #c62828;
+    /* Red stop square */
+    margin-left: 0;
+    border-radius: 2px;
+}
+
+.tafseer-play:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .tafseer-close {
     background: rgba(255, 255, 255, 0.2);
     border: none;
