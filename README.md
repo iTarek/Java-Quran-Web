@@ -412,7 +412,7 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 - [x] Persistent highlighting (Yellow) vs Hover (Gray)
 - [x] Tafseer Modal (Arabic Al-Muyassar & English Saheeh)
 - [x] Audio Recitation (Verse-by-verse playback)
-- [x] Keyboard Navigation (Arrows & Space)
+- [x] Keyboard Navigation (Arrows & Space for Menu)
 - [x] Footer Navigation Controls
 
 ### Version 2.0 (Planned)

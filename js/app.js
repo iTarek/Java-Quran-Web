@@ -476,7 +476,7 @@ class QuranApp {
                 this.nextPage(); // Left goes to next page in RTL
             } else if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault(); // Prevent scrolling
-                this.nextPage(); // Space goes to next page
+                this.openOverlay(); // Space opens navigation overlay
             }
         });
     }
