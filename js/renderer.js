@@ -311,8 +311,16 @@ class PageRenderer {
             surahEl.className = 'header-surah';
             surahEl.textContent = `سُورَةُ ${names}`;
 
-            header.appendChild(juzEl);   // First element = Right side in RTL
-            header.appendChild(surahEl); // Last element = Left side in RTL
+            // Page face indicator (Middle)
+            // Odd page (Right) = ◨
+            // Even page (Left) = ◧
+            const indicatorEl = document.createElement('div');
+            indicatorEl.className = 'header-face-indicator';
+            indicatorEl.textContent = pageNumber % 2 !== 0 ? '◨' : '◧';
+
+            header.appendChild(juzEl);      // Right
+            header.appendChild(indicatorEl); // Middle
+            header.appendChild(surahEl);    // Left
         }
 
         return header;
@@ -327,11 +335,34 @@ class PageRenderer {
         footer.dataset.page = pageNumber;
         footer.dataset.pageFace = pageFace;
 
+        // Next Page Button (Right side in RTL if appended first -> Points Right for "Next" linear flow)
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'footer-nav-arrow next-page-btn';
+        nextBtn.innerHTML = '←'; // Right arrow for Next
+        nextBtn.ariaLabel = 'الصفحة التالية';
+
+        // Previous Page Button (Left side in RTL if appended last -> Points Left for "Back" linear flow)
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'footer-nav-arrow prev-page-btn';
+        prevBtn.innerHTML = '→'; // Left arrow for Prev
+        prevBtn.ariaLabel = 'الصفحة السابقة';
+
         const pageNumEl = document.createElement('span');
         pageNumEl.className = 'page-number';
         pageNumEl.textContent = this.arabicNumerals(pageNumber);
 
-        footer.appendChild(pageNumEl);
+        // Order in RTL (Right to Left): [First Child] ... [Last Child]
+        // User wanted: Right side = Prev, Left side = Next
+        // "Switch the places... without change how the arrow look"
+
+        footer.appendChild(prevBtn); // Rightmost (First Child in RTL)
+        footer.appendChild(pageNumEl); // Center
+        footer.appendChild(nextBtn); // Leftmost (Last Child in RTL)
+
+
+
         return footer;
     }
 

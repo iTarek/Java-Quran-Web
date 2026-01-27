@@ -432,6 +432,11 @@ class QuranApp {
 
         // Add click handlers to page headers/footers
         document.addEventListener('click', (e) => {
+            // Provide a way to ignore clicks on navigation arrows
+            if (e.target.closest('.footer-nav-arrow')) {
+                return;
+            }
+
             if (e.target.closest('.page-header') || e.target.closest('.page-footer')) {
                 this.openOverlay();
             }
@@ -445,15 +450,16 @@ class QuranApp {
      * Setup navigation arrows for prev/next page
      */
     setupNavArrows() {
-        const prevBtn = document.getElementById('prevPageBtn');
-        const nextBtn = document.getElementById('nextPageBtn');
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.prevPage());
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.nextPage());
+        // Event delegation for footer navigation buttons
+        const pageContainer = document.getElementById('pageContainer');
+        if (pageContainer) {
+            pageContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.prev-page-btn')) {
+                    this.prevPage();
+                } else if (e.target.closest('.next-page-btn')) {
+                    this.nextPage();
+                }
+            });
         }
 
         // Keyboard navigation
@@ -470,12 +476,16 @@ class QuranApp {
                 this.nextPage(); // Left goes to next page in RTL
             } else if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault(); // Prevent scrolling
-                this.openOverlay();
+                this.nextPage(); // Space goes to next page
             }
         });
+    }
 
-        // Update arrow states based on current page
-        this.updateNavArrows();
+    /**
+     * Update navigation arrow states (deprecated - specific to old buttons)
+     */
+    updateNavArrows() {
+        // No-op for now as buttons are re-rendered with page
     }
 
     /**
@@ -534,6 +544,7 @@ class QuranApp {
         list.querySelectorAll('.nav-list-item').forEach(item => {
             item.addEventListener('click', () => {
                 const page = parseInt(item.dataset.page);
+                this.persistentHighlight = null;  // Clear on manual navigation
                 this.renderPage(page);
                 this.closeOverlay();
             });

@@ -343,16 +343,9 @@ This is a simple, clean implementation, but there's always room for improvement.
 
 ### Feature Ideas
 
-Some areas where we need help:
+Please see the [Roadmap](#-roadmap) (Version 2.0) for prioritized features such as **Search**, **Bookmarking**, **Dark Mode**, and **Offline Support**. We welcome community contributions for the following enhancements:
 
-- [ ] **Bookmarking System** - Save favorite pages
-- [ ] **Search Functionality** - Search by keyword or verse reference
-- [ ] **Audio Integration** - Add recitation playback
-- [ ] **Translation Layer** - Display translations alongside Arabic text
-- [ ] **Dark Mode** - Add a dark theme option
-- [ ] **Offline Support** - Implement Service Workers for offline access
 - [ ] **Touch Gestures** - Swipe navigation for mobile
-- [ ] **Keyboard Shortcuts** - Power user features
 - [ ] **Print Optimization** - Better print layouts
 - [ ] **Accessibility** - Screen reader support and ARIA labels
 
@@ -407,30 +400,27 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 
 ## 📈 Roadmap
 
-### Version 1.0 (Current)
-- [x] Basic Mushaf rendering
-- [x] Page navigation
-- [x] Surah and Juz navigation
-- [x] Responsive design with CSS Container Queries
-- [x] Dynamic scaling for all screen sizes
-- [x] Public JavaScript API (goToAyah)
-- [x] URL parameter navigation (?surah=X&ayah=Y)
-- [x] Persistent ayah highlighting (yellow)
+### Version 1.0 (Foundation)
+- [x] Basic Mushaf rendering using QCF4 fonts
+- [x] Page navigation & Surah/Juz indexing
+- [x] Responsive layout with Container Queries
+- [x] Hover highlighting for verses
 
-### Version 1.1 (Features)
-- [x] Tafseer (Interpretation) - Arabic & English
-- [x] Audio Recitation (Verse by Verse)
+### Version 1.1 (Interactive)
+- [x] Public JavaScript API (`goToAyah`)
+- [x] URL parameter navigation (`?surah=2&ayah=255`)
+- [x] Persistent highlighting (Yellow) vs Hover (Gray)
+- [x] Tafseer Modal (Arabic Al-Muyassar & English Saheeh)
+- [x] Audio Recitation (Verse-by-verse playback)
 - [x] Keyboard Navigation (Arrows & Space)
-- [x] Enhanced Navigation UI
-- [ ] Search functionality
-- [ ] Bookmarking system
+- [x] Footer Navigation Controls
 
-### Version 2.0 (Future)
-- [ ] Audio recitation
-- [ ] Translation overlay
-- [ ] Advanced search
-- [ ] PWA support
-- [ ] Multi-language interface
+### Version 2.0 (Planned)
+- [ ] Full Search functionality (Arabic & English)
+- [ ] Bookmarking & Favorites system
+- [ ] PWA (Progressive Web App) offline support
+- [ ] Dark Mode / Themes
+- [ ] Multiple Reciter options
 
 ---
 
