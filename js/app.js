@@ -25,6 +25,7 @@ class QuranApp {
         // Audio state
         this.currentAudio = null;
         this.currentPlayingAyah = null;
+        this._highlightTimeout = null;
     }
 
     /**
@@ -45,11 +46,21 @@ class QuranApp {
             this.renderer = new PageRenderer(this.dataLoader);
             this.renderer.init(document.getElementById('pageContainer'));
 
+            // Detect Safari and add class to document for CSS workarounds
+            // Safari has bugs with ::before pseudo-elements on inline elements
+            this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (this.isSafari) {
+                document.documentElement.classList.add('is-safari');
+            }
+
             // Setup overlay navigation
             this.setupOverlay();
 
             // Setup navigation arrows
             this.setupNavArrows();
+
+            // Setup postMessage listener for parent frame communication
+            this.setupMessageListener();
 
             // Check URL parameters for ayah navigation first, then hash for page
             const urlAyah = this.getAyahFromURL();
@@ -79,6 +90,11 @@ class QuranApp {
             // Hide loading, show app
             this.hideLoading();
 
+            // Notify parent frame that we're ready
+            if (window.parent !== window) {
+                window.parent.postMessage({ type: 'mushaf-ready' }, '*');
+            }
+
             // Scale page to fit viewport (disabled - using CSS viewport units instead)
             // this.scaleToFit();
             // window.addEventListener('resize', () => this.scaleToFit());
@@ -96,6 +112,41 @@ class QuranApp {
     }
 
     /**
+     * Setup postMessage listener for communication with parent frame
+     * This is more reliable than direct iframe access, especially on mobile Safari
+     */
+    setupMessageListener() {
+        window.addEventListener('message', async (event) => {
+            // Only handle messages from parent frame
+            if (event.source !== window.parent) return;
+
+            const { type, surah, ayah } = event.data || {};
+
+            if (type === 'goToAyah' && surah && ayah) {
+                try {
+                    const success = await this.goToAyah(surah, ayah);
+                    window.parent.postMessage({
+                        type: 'goToAyah-result',
+                        success,
+                        surah,
+                        ayah
+                    }, '*');
+                } catch (err) {
+                    window.parent.postMessage({
+                        type: 'goToAyah-result',
+                        success: false,
+                        error: err.message
+                    }, '*');
+                }
+            } else if (type === 'clearHighlight') {
+                this.clearPersistentHighlight();
+            } else if (type === 'ping') {
+                window.parent.postMessage({ type: 'pong', isReady: this.isReady }, '*');
+            }
+        });
+    }
+
+    /**
      * PUBLIC API: Navigate to a specific ayah and highlight it
      * @param {number|string} surah - Surah number (1-114)
      * @param {number|string} ayah - Ayah number
@@ -103,14 +154,14 @@ class QuranApp {
      * @param {boolean} options.persistent - If true, highlight stays until clearPersistentHighlight() is called
      * @param {boolean} options.scroll - If true, scroll the ayah into view (default: true)
      * @returns {Promise<boolean>} - Returns true if successful, false if ayah not found
-     * 
+     *
      * @example
      * // Navigate to Surah Al-Baqarah (2), Ayah 255 (Ayat Al-Kursi)
      * await quranApp.goToAyah(2, 255);
-     * 
+     *
      * // With persistent highlight (stays until manually cleared)
      * await quranApp.goToAyah(2, 255, { persistent: true });
-     * 
+     *
      * // Later, clear the persistent highlight
      * quranApp.clearPersistentHighlight();
      */
@@ -145,28 +196,44 @@ class QuranApp {
             return false;
         }
 
+        // Clear any pending highlight timeout first
+        if (this._highlightTimeout) {
+            clearTimeout(this._highlightTimeout);
+            this._highlightTimeout = null;
+        }
+
         // Set persistent highlight if requested
         if (persistent) {
             this.persistentHighlight = { surah: surahNum, ayah: ayahNum };
         }
 
-        // Navigate to the page
+        // Navigate to the page if needed
         if (this.currentPage !== page) {
+            // renderPage will handle the highlight after rendering
             await this.renderPage(page);
         } else {
-            // If already on the page, apply the persistent highlight (yellow)
-            this.removePersistentHighlight();
-            this.applyPersistentHighlight(surahNum, ayahNum);
-        }
+            // Already on the page - wait for fonts then apply highlight
+            const applyHighlight = async () => {
+                // Wait for fonts to be ready
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
 
-        // Scroll the ayah into view
-        if (scroll) {
-            const ayahElement = document.querySelector(
-                `.ayah-group[data-surah="${surahNum}"][data-ayah="${ayahNum}"]`
-            );
-            if (ayahElement) {
-                ayahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+                this.removePersistentHighlight();
+                this.applyPersistentHighlight(surahNum, ayahNum);
+
+                // scrollIntoView disabled - causes page height changes with overflow:hidden containers
+                // if (scroll) {
+                //     const ayahElement = document.querySelector(
+                //         `.ayah-group[data-surah="${surahNum}"][data-ayah="${ayahNum}"]`
+                //     );
+                //     if (ayahElement) {
+                //         ayahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                //     }
+                // }
+            };
+
+            await applyHighlight();
         }
 
         console.log(`📍 Navigated to Surah ${surahNum}, Ayah ${ayahNum} (Page ${page})`);
@@ -265,8 +332,61 @@ class QuranApp {
             this.setupAyahHighlighting();
 
             // Apply persistent highlight if set (yellow color)
+            // Wait for fonts to load so we don't highlight invisible content
             if (this.persistentHighlight) {
-                this.applyPersistentHighlight(this.persistentHighlight.surah, this.persistentHighlight.ayah);
+                const targetSurah = this.persistentHighlight.surah;
+                const targetAyah = this.persistentHighlight.ayah;
+                const targetPage = pageNumber;
+
+                // Clear any pending highlight
+                if (this._highlightTimeout) {
+                    clearTimeout(this._highlightTimeout);
+                    this._highlightTimeout = null;
+                }
+
+                // Apply highlight helper
+                const doApplyHighlight = () => {
+                    // Verify highlight is still valid for this page
+                    if (this.persistentHighlight &&
+                        this.persistentHighlight.surah === targetSurah &&
+                        this.persistentHighlight.ayah === targetAyah &&
+                        this.currentPage === targetPage) {
+                        this.applyPersistentHighlight(targetSurah, targetAyah);
+
+                        // scrollIntoView disabled - causes page height changes with overflow:hidden containers
+                        // The Mushaf page is fixed height and doesn't need scrolling
+                        // const ayahElement = document.querySelector(
+                        //     `.ayah-group[data-surah="${targetSurah}"][data-ayah="${targetAyah}"]`
+                        // );
+                        // if (ayahElement) {
+                        //     ayahElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // }
+                    }
+                };
+
+                // Wait for fonts to load, then apply highlight
+                const applyHighlightWhenReady = async () => {
+                    try {
+                        // Wait for all fonts to be loaded (with timeout for Safari)
+                        if (document.fonts && document.fonts.ready) {
+                            await Promise.race([
+                                document.fonts.ready,
+                                new Promise(resolve => setTimeout(resolve, 500)) // 500ms timeout fallback
+                            ]);
+                        }
+                    } catch (e) {
+                        console.warn('Font loading error, proceeding anyway:', e);
+                    }
+
+                    // Double rAF to ensure paint is complete after fonts load
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            doApplyHighlight();
+                        });
+                    });
+                };
+
+                applyHighlightWhenReady();
             }
 
             // Log page info
@@ -308,8 +428,27 @@ class QuranApp {
      */
     applyPersistentHighlight(surah, ayah) {
         const selector = `.ayah-group[data-surah="${surah}"][data-ayah="${ayah}"]`;
-        document.querySelectorAll(selector).forEach(el => {
+        const elements = document.querySelectorAll(selector);
+
+        if (elements.length === 0) return;
+
+        // Check if Safari (CSS ::before doesn't work reliably on Safari)
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        elements.forEach(el => {
+            // Force a reflow before adding class
+            // eslint-disable-next-line no-unused-expressions
+            el.offsetHeight;
             el.classList.add('persistent-highlight');
+
+            // Safari workaround: Use background directly on element
+            // Safari has bugs with CSS variables and animations on pseudo-elements
+            if (isSafari) {
+                const highlightColor = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--highlight-persistent').trim() || 'rgba(255, 235, 59, 0.5)';
+                el.style.setProperty('--safari-highlight', highlightColor);
+                el.classList.add('safari-highlight-fix');
+            }
         });
     }
 
@@ -317,8 +456,10 @@ class QuranApp {
      * Remove persistent highlight (yellow)
      */
     removePersistentHighlight() {
-        document.querySelectorAll('.ayah-group.persistent-highlight').forEach(el => {
+        document.querySelectorAll('.ayah-group.persistent-highlight, .ayah-group.safari-highlight-fix').forEach(el => {
             el.classList.remove('persistent-highlight');
+            el.classList.remove('safari-highlight-fix');
+            el.style.removeProperty('--safari-highlight');
         });
     }
 
