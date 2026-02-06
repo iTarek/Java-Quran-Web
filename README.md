@@ -6,7 +6,6 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-
 ## 🌐 Live Demo
 
 > **[Click here to view the Live Demo](https://itarek.github.io/Java-Quran-Web/)**
@@ -18,10 +17,12 @@
 <div align="center">
 
 ### Main Quran Page View
+
 ![Quran Page - Surah Al-Baqarah](Screenshot1.jpeg)
 *Beautiful rendering of the Quran using QCF4 fonts with authentic Mushaf Madina layout*
 
 ### Navigation Modal
+
 ![Navigation Modal - Surah List](Screenshot2.jpeg)
 *Easy navigation through Surahs and Juz with an elegant modal interface*
 
@@ -62,6 +63,7 @@ This project is built with **pure web technologies**, no frameworks required:
 ### Why Vanilla JavaScript?
 
 We chose vanilla JavaScript to:
+
 - ✅ Keep the project lightweight and fast
 - ✅ Avoid framework bloat and dependencies
 - ✅ Make the codebase accessible to all developers
@@ -106,12 +108,14 @@ Java-Quran-Web/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
-   git clone https://github.com/yourusername/Java-Quran-Web.git
+   git clone https://github.com/iTarek/Java-Quran-Web.git
    cd Java-Quran-Web
    ```
 
 2. **Start a local server**
+
    ```bash
    # Using Python 3
    python -m http.server 8000
@@ -124,7 +128,7 @@ Java-Quran-Web/
    ```
 
 3. **Open in browser**
-   
+
    Navigate to `http://localhost:8000` in your browser.
 
 ---
@@ -141,6 +145,7 @@ Java-Quran-Web/
 ### URL Navigation
 
 You can navigate directly to any page using URL hashes:
+
 ```
 http://localhost:8000/#page/1    # Al-Fatiha (Page 1)
 http://localhost:8000/#page/293  # Al-Kahf (Page 293)
@@ -149,6 +154,7 @@ http://localhost:8000/#page/293  # Al-Kahf (Page 293)
 ### Direct Ayah Navigation (URL Parameters)
 
 Navigate directly to any specific ayah with automatic page detection and highlighting:
+
 ```
 http://localhost:8000/?surah=2&ayah=255   # Ayat Al-Kursi
 http://localhost:8000/?s=36&a=1           # Surah Ya-Sin, Ayah 1
@@ -172,6 +178,7 @@ The ayah will be highlighted in **yellow** to distinguish it from hover highligh
 ### Tafseer & Audio
 
 Clicking on any ayah opens a modal with:
+
 1. **Arabic Tafseer**: Al-Tafseer Al-Muyassar (التفسير الميسر)
 2. **English Translation**: Saheeh International
 3. **Audio Player**: Listen to the verse recitation by Mishary Rashid Alafasy
@@ -243,21 +250,27 @@ window.addEventListener('load', async () => {
 ### Core Components
 
 #### 1. **QuranApp** (`app.js`)
+
 The main application controller that:
+
 - Initializes the data loader and renderer
 - Manages application state
 - Handles navigation between pages
 - Controls the overlay modal for navigation
 
 #### 2. **QuranDataLoader** (`data-loader.js`)
+
 Responsible for:
+
 - Loading all Quran data files
 - Parsing CSV layout data
 - Providing data access methods
 - Caching loaded data
 
 #### 3. **PageRenderer** (`renderer.js`)
+
 Handles:
+
 - Dynamic font loading
 - Page layout rendering
 - Glyph-by-glyph positioning
@@ -293,6 +306,7 @@ The application uses a carefully crafted color scheme inspired by traditional Qu
 ### Responsive Design
 
 The application adapts to different screen sizes:
+
 - Desktop: Full Mushaf page view
 - Tablet: Optimized layout with touch controls
 - Mobile: Single-column view with adjusted font sizes
@@ -304,6 +318,7 @@ The application adapts to different screen sizes:
 ### QCF4 Font System
 
 The QCF4 fonts are vector-based fonts that encode:
+
 - Arabic Quranic text glyphs
 - Tajweed rules
 - Pause marks (waqf signs)
@@ -315,6 +330,7 @@ Each glyph is mapped to a Unicode character in the Private Use Area (0xF100+).
 ### Mushaf Layout
 
 The application renders all 604 pages of the Mushaf Madina:
+
 - **15 lines per page** - Exact match to printed Mushaf
 - **Dynamic line centering** - Specific lines are centered per page
 - **Page headers** - Display Surah name and Juz number
@@ -401,12 +417,14 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 ## 📈 Roadmap
 
 ### Version 1.0 (Foundation)
+
 - [x] Basic Mushaf rendering using QCF4 fonts
 - [x] Page navigation & Surah/Juz indexing
 - [x] Responsive layout with Container Queries
 - [x] Hover highlighting for verses
 
 ### Version 1.1 (Interactive)
+
 - [x] Public JavaScript API (`goToAyah`)
 - [x] URL parameter navigation (`?surah=2&ayah=255`)
 - [x] Persistent highlighting (Yellow) vs Hover (Gray)
@@ -416,6 +434,7 @@ The QCF4 fonts are proprietary to the **King Fahd Complex for the Printing of th
 - [x] Footer Navigation Controls
 
 ### Version 2.0 (Planned)
+
 - [ ] Full Search functionality (Arabic & English)
 - [ ] Bookmarking & Favorites system
 - [ ] PWA (Progressive Web App) offline support
